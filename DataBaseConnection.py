@@ -202,7 +202,7 @@ def analyze_data(conn):
               "type": "bar",
               "color": "red"
           }
-      ]
+      ] 
 
       # Préparer la figure
       fig, axes = plt.subplots(2, 2, figsize=(15, 10))
