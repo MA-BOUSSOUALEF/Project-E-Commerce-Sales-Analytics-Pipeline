@@ -13,3 +13,6 @@ df['Month'] = df['InvoiceDate'].dt.month
 df['Day'] = df['InvoiceDate'].dt.day
 
 print(df.head())
+
+
+
