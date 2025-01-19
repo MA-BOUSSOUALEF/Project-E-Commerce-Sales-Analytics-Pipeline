@@ -71,9 +71,3 @@ Ce projet est idéal pour ceux qui souhaitent se familiariser avec l'analyse de 
 - Python 3.x
 - PostgreSQL (ou un autre système de gestion de base de données compatible)
 - Bibliothèques Python nécessaires : pandas, SQLAlchemy, matplotlib, seaborn
-
-## Installation
-
-1. Clonez ce repository :
-   ```bash
-   git clone https://github.com/votre-utilisateur/ecommerce-sales-analytics-pipeline.git
