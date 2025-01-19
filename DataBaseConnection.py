@@ -97,28 +97,154 @@ def load_data_to_postgres(data, conn, table_name):
 
 # Étape 5 : Analyse et visualisation
 def analyze_data(conn):
-    query = """
-        SELECT Country, SUM(TotalPrice) AS TotalSales
-        FROM staging_sales_data
-        GROUP BY Country
-        ORDER BY TotalSales DESC;
-    """
-    with conn.cursor() as cur:
-        cur.execute(query)
-        result = cur.fetchall()
+  # #les commandes de chaque pays
+  #   query = """
+  #       SELECT Country, SUM(TotalPrice) AS TotalSales
+  #       FROM staging_sales_data
+  #       GROUP BY Country
+  #       ORDER BY TotalSales DESC;
+  #   """
+  #   #Top 5 des produits les plus vendus 
+  #   query = """
+  #       SELECT StockCode, SUM(Quantity) AS TotalQuantity
+  #       FROM fact_sales
+  #       GROUP BY StockCode
+  #       ORDER BY TotalQuantity DESC
+  #       LIMIT 5;
 
-    # Préparer les données pour la visualisation
-    countries = [row[0] for row in result]
-    total_sales = [row[1] for row in result]
+  #   """
+  #   #Revenus par mois 
+  #   query = """
+  #       SELECT EXTRACT(MONTH FROM InvoiceDate) AS Month, SUM(TotalPrice) AS Revenue
+  #       FROM fact_sales
+  #       GROUP BY Month
+  #       ORDER BY Month;
 
-    # Visualisation
-    plt.bar(countries, total_sales, color='skyblue')
-    plt.title('Ventes par pays')
-    plt.xlabel('Pays')
-    plt.ylabel('Ventes totales')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
+
+  #   """
+  #   #Nombre de clients uniques par pays 
+  #   query = """
+  #       SELECT Country, COUNT(DISTINCT CustomerID) AS UniqueCustomers
+  #       FROM fact_sales
+  #       GROUP BY Country;
+  #   """
+  #   with conn.cursor() as cur:
+  #       cur.execute(query)
+  #       result = cur.fetchall()
+
+  #   # Préparer les données pour la visualisation
+  #   countries = [row[0] for row in result]
+  #   total_sales = [row[1] for row in result]
+
+  #   # Visualisation
+  #   plt.figure(figsize=(10, 5))
+  #   plt.bar(countries, total_sales, color='skyblue')
+  #   plt.title('Ventes par pays')
+  #   plt.xlabel('Pays')
+  #   plt.ylabel('Ventes totales')
+  #   plt.xticks(rotation=45)
+  #   plt.tight_layout()
+  #   plt.show()
+  # Initialiser les listes de données
+      data_queries = [
+          {
+              "query": """
+                  SELECT Country, SUM(TotalPrice) AS TotalSales
+                  FROM staging_sales_data
+                  GROUP BY Country
+                  ORDER BY TotalSales DESC
+                  LIMIT 5;
+              """,
+              "title": "Ventes totales par pays",
+              "xlabel": "Pays",
+              "ylabel": "Ventes totales",
+              "type": "bar",
+              "color": "skyblue"
+          },
+          {
+              "query": """
+                  SELECT description, SUM(Quantity) AS TotalQuantity
+                  FROM staging_sales_data
+                  GROUP BY description
+                  ORDER BY TotalQuantity DESC
+                  LIMIT 5;
+              """,
+              "title": "Top 5 des produits les plus vendus",
+              "xlabel": "Code produit",
+              "ylabel": "Quantité totale",
+              "type": "bar",
+              "color": "green"
+          },
+          {
+              "query": """
+                  SELECT EXTRACT(MONTH FROM InvoiceDate) AS Month, SUM(TotalPrice) AS Revenue
+                  FROM staging_sales_data
+                  GROUP BY Month
+                  ORDER BY Month;
+              """,
+              "title": "Revenus par mois",
+              "xlabel": "Mois",
+              "ylabel": "Revenus",
+              "type": "line",
+              "color": "green"
+          },
+          {
+              "query": """
+                  SELECT Country, COUNT(DISTINCT CustomerID) AS UniqueCustomers
+                  FROM staging_sales_data
+                  GROUP BY Country
+                  ORDER BY Country DESC
+                  LIMIT 5;
+              """,
+              "title": "Nombre de clients uniques par pays",
+              "xlabel": "Pays",
+              "ylabel": "Clients uniques",
+              "type": "bar",
+              "color": "red"
+          }
+      ]
+
+      # Préparer la figure
+      fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+      axes = axes.flatten()
+      fig.patch.set_facecolor('black')
+
+      for i, data_query in enumerate(data_queries):
+          with conn.cursor() as cur:
+              cur.execute(data_query["query"])
+              result = cur.fetchall()
+
+          # Préparer les données pour le graphique
+          labels = [row[0] for row in result]
+          values = [row[1] for row in result]
+
+          ax = axes[i]
+          ax.set_facecolor('black')  # Modifier le fond des axes (graphiques) en noir
+          ax.spines['top'].set_color('white')  # Les bordures du graphique en blanc
+          ax.spines['right'].set_color('white')
+          ax.spines['left'].set_color('white')
+          ax.spines['bottom'].set_color('white')
+
+          # Changer la couleur des ticks (étiquettes sur les axes)
+          ax.tick_params(axis='x', rotation=45, colors='white')  # Couleur des ticks sur l'axe x
+          ax.tick_params(axis='y', colors='white')  # Couleur des ticks sur l'axe y
+
+          # Création des graphiques
+          if data_query["type"] == "bar":
+              ax.bar(labels, values, color=data_query["color"])
+          elif data_query["type"] == "line":
+              ax.plot(labels, values, marker='o', linestyle='-', color=data_query["color"])
+
+          # Configurer les graphiques
+          ax.set_title(data_query["title"], color='white')  # Titre en blanc
+          ax.set_xlabel(data_query["xlabel"], color='white')  # Légende de l'axe x en blanc
+          ax.set_ylabel(data_query["ylabel"], color='white')  # Légende de l'axe y en blanc
+
+      # Ajuster la mise en page
+      plt.tight_layout()
+      plt.show()
+
+    
 
 # Pipeline principal
 def main():
@@ -141,10 +267,10 @@ def main():
         transformed_data = transform_data(raw_data)
 
         # Créer les tables
-        create_tables(conn)
+        #create_tables(conn)
 
         # Charger les données dans PostgreSQL
-        load_data_to_postgres(transformed_data, conn, 'staging_sales_data')
+      #load_data_to_postgres(transformed_data, conn, 'staging_sales_data')
 
         # Analyser et visualiser
         analyze_data(conn)
