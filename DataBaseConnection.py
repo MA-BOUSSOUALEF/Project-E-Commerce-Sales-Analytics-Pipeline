@@ -187,7 +187,7 @@ def analyze_data(conn):
               "ylabel": "Revenus",
               "type": "line",
               "color": "green"
-          },
+          }, 
           {
               "query": """
                   SELECT Country, COUNT(DISTINCT CustomerID) AS UniqueCustomers
