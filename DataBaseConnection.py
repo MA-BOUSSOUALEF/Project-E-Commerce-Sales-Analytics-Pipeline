@@ -3,7 +3,7 @@ import psycopg2
 from psycopg2.extras import execute_values
 import matplotlib.pyplot as plt
 from datetime import datetime
-
+         
 # Informations de connexion à PostgreSQL
 hostname = '172.25.112.1'
 database = 'Ecommerce_db'
